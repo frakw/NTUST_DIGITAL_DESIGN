@@ -10,6 +10,13 @@ public:
 	int else_edge,then_edge;//index of arrayreduced_order()
 	string value="";
 	bool redundent = false;
+	bool operator==(Node& i) {
+		return (this->value == i.value) && (this->else_edge == i.else_edge) && (this->then_edge == i.then_edge);
+	}
+	bool edge_same() {
+		return else_edge == then_edge;
+	}
+
 };
 class ROBDD {
 public:
@@ -23,8 +30,14 @@ public:
 		btree[0].value = "0";
 		btree[size-1].value = "1";
 	}
+	int layer_start(int L) {
+		return (1 << L);
+	}
+	int layer_end(int L) {
+		return (1 << (L + 1));
+	}
 	void create_layer(string input,int layer_count) {
-		for (int i = (1 << layer_count);i < (1 << (layer_count + 1));i++) {
+		for (int i = layer_start(layer_count);i < layer_end(layer_count);i++) {
 			btree[i].value = input;
 			if (layer_count == i_count - 1) continue;
 			btree[i].else_edge = i * 2;
@@ -32,11 +45,11 @@ public:
 		}
 	}
 	void output(ofstream& dot) {
-		for (int i = (1 << (i_count - 1)),j = 0;i < size - 1;i++,j+=2) {
+		for (int i = layer_start(i_count - 1),j = 0;i < layer_end(i_count - 1);i++,j+=2) {
 			btree[i].else_edge = get_result(j) ? size - 1 : 0;
 			btree[i].then_edge = get_result(j+1) ? size - 1 : 0;
 		}
-		reduced_order();//recursive
+		reduced_order();
 		//output to file
 		dot << "dfgdfh";
 	}
@@ -63,6 +76,26 @@ public:
 	}
 	void reduced_order() {//main algorithm here
 		print_tree();
+		for (int i = i_count - 1;i >= 0;i--) {//layer from down to up
+			int start = layer_start(i), end = layer_end(i);
+			for (int j = start;j < end;j++) {
+				if (btree[j].redundent) continue;
+				if (btree[j].edge_same()) {
+					(j % 2 ? btree[j / 2].then_edge : btree[j / 2].else_edge) = btree[j].else_edge;
+					btree[j].redundent = true;
+					continue;
+				}
+				for (int k = j + 1;k < end;k++) {
+					if (btree[k].redundent) continue;
+					if (btree[j] == btree[k]) {
+						(k % 2 ? btree[k / 2].then_edge : btree[k / 2].else_edge) = j;
+						btree[k].redundent = true;
+					}
+				}
+			}
+			print_tree();
+		}
+
 	}
 	void print_tree() {
 		cout << "index" << '\t' << "Variable" << "Else-edge"  << "Then-edge" << '\t' << "Comment" << endl;
