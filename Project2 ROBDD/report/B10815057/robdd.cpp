@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 		cout << "command error!" << endl;
 		return 0;
 	}
-	ifstream input(argv[1]/*"input.pla"*/);//argv[0] ¬O¥»µ{¦¡¦WºÙ
+	ifstream input(argv[1]/*"input.pla"*/);//argv[0] æ˜¯æœ¬ç¨‹å¼åç¨±
 	ofstream dotfile(argv[2]/*"output.pla"*/);
 	string line,word;
 	ROBDD robdd;
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
 		else if (word == ".p") {
 			int line_count;
 			char nl;
-			input >> line_count;//Åª±¼´«¦æ
+			input >> line_count;//è®€æ‰æ›è¡Œ
 			input.ignore();
 			for (int i = 0;i < line_count;i++) {
 				getline(input, line);
