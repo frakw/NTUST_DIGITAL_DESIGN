@@ -99,18 +99,18 @@ public:
 			for (auto j = literal[i - 1].begin();j != literal[i - 1].end();j++) {
 				for (auto k = next(j);k != literal[i - 1].end();k++) {
 					sop merge_result;
-					//if (merge(j->second, k->second, merge_result)) {
-					//	j->second.merged = true;
-					//	k->second.merged = true;
-					//	literal[i][merge_result.bits] = merge_result;
-					//}
+					if (merge(j->second, k->second, merge_result)) {
+						j->second.merged = true;
+						k->second.merged = true;
+						literal[i][merge_result.bits] = merge_result;
+					}
 				}
-
 				if (!j->second.merged || i == variable_num - 1) {
 					essential_pi[j->second.bits] = j->second;
-					for (auto g : j->second.minterms) {
-						count[g]++;
+					for (auto g = j->second.minterms.begin(); g != j->second.minterms.end();g++) {
+						count[*g]++;
 					}
+
 				}
 			}
 		}
@@ -123,8 +123,9 @@ public:
 					for (auto& k : it->second.minterms) {
 						count[k] = -1;
 					}
+					auto _prev = prev(it);
 					essential_pi.erase(it);
-					it--;
+					it = _prev;
 				}
 			}
 			i.second = -1;
