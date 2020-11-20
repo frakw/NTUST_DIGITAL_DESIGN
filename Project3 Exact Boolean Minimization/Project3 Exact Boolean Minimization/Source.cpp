@@ -1,12 +1,15 @@
-#include<fstream>
-#include<iostream>
-#include<string>
-#include<vector>
-#include<sstream>
-#include<set>
-#include<map>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <sstream>
+#include <set>
+#include <bitset>
+#include <map>
+#include <limits.h>
+#include <algorithm>
 using namespace std;
-//#define CMD
+#define CMD
 class sop {
 public:
 	sop() {}
@@ -32,7 +35,8 @@ public:
 	bool operator==(const sop& x)const { return bits == x.bits; }
 	char& operator[](const int index) { return bits[index]; }
 };
-
+void binary_add_one(bool* b, int size);
+int one_count(bool* b, int size);
 class MINI {
 public:
 	~MINI() {
@@ -47,7 +51,6 @@ public:
 	vector<sop*> all;
 	map<string, vector<sop*> > terms;
 	vector<sop> result;
-	//vector<vector<sop*> > group;
 	void new_sop(string in, bool dont_care) {
 		int i;
 		for (i = 0;i < in.size();i++) {
@@ -81,6 +84,7 @@ public:
 		if (different_count == 1) {
 			result.minterms.insert(a.minterms.begin(), a.minterms.end());
 			result.minterms.insert(b.minterms.begin(),b.minterms.end());
+			if (a.dont_care && b.dont_care) result.dont_care = true;
 			return true;
 		}
 		return false;
@@ -116,7 +120,6 @@ public:
 		}
 		for (auto& i : count) {
 			if (i.second != 1) continue;
-			int g = 0;
 			for (auto it = essential_pi.begin();it != essential_pi.end();it++) {
 				if (it->second.minterms.find(i.first) != it->second.minterms.end()) {
 					result.push_back(it->second);
@@ -130,46 +133,107 @@ public:
 			}
 			i.second = -1;
 		}
-		vector<sop*> remain_minterm;
+		set<sop*> remain_minterm;
 		vector<sop> remain_pi;
 		for (auto& i : essential_pi) {
-			remain_pi.push_back(i.second);
+			if(!i.second.dont_care) remain_pi.push_back(i.second);
 		}
 		for (auto it = count.begin();it != count.end();it++) {
-			if (it->second != -1) {
-				remain_minterm.push_back(it->first);
+			if (it->second != -1 && !it->first->dont_care) {
+				remain_minterm.insert(it->first);
 			}
 		}
-		for (auto i = remain_pi.begin();i != remain_pi.end();i++) {
-			for (auto& j : remain_minterm) {
-				if (i->minterms.find(j) == i->minterms.end()) {
-					i->minterms.erase(j);
+		for (auto& i : remain_pi) {
+			for (auto j = i.minterms.begin();j != i.minterms.end();) {//j++不可放這
+				bool remain = false;
+				for (auto k : remain_minterm) {
+					if (*j == k) {
+						remain = true;
+						break;
+					}
+				}
+				if (!remain /*|| (*j)->dont_care*/) {
+					 i.minterms.erase(j++);//這樣寫才對，不能先往前指再++
+				}
+				else {
+					j++;
 				}
 			}
 		}
 		Petrick_Method(remain_minterm, remain_pi);
 		delete[] literal;
 	}
-	void Petrick_Method(vector<sop*> remain_minterm, vector<sop> remain_pi) {
-		for (auto i : remain_minterm) {
-			cout << i->bits << endl;
+	void Petrick_Method(set<sop*> remain_minterm, vector<sop> remain_pi) {
+		bool* comnination = new bool[remain_pi.size()] {};
+		int min_one_count = INT_MAX;
+		vector<sop> min_comb;
+		comnination[0] = 1;
+		for (int i = 1;i < (1 << remain_pi.size());i++) {
+			int one_amount = one_count(comnination, remain_pi.size());
+			if (one_amount >= min_one_count) continue;
+			set<sop*> this_turn;
+			for (int j = 0;j < remain_pi.size();j++) {
+				if (comnination[j]) {
+					this_turn.insert(remain_pi[j].minterms.begin(), remain_pi[j].minterms.end());
+				}
+			}
+			if (remain_minterm == this_turn) {
+				min_comb.clear();
+				for (int j = 0;j < remain_pi.size();j++) {
+					if (comnination[j]) {
+						min_comb.push_back(remain_pi[j]);
+					}
+				}
+				min_one_count = one_amount;
+			}
+			binary_add_one(comnination, remain_pi.size());
 		}
-		for (auto i : remain_pi) {
-			cout << i.bits << endl;
-			for (auto j : i.minterms) {
-				cout << '\t' << j->bits << endl;
+		delete[] comnination;
+		result.insert(result.end(), min_comb.begin(), min_comb.end());
+	}
+	void output_to_file(ifstream& in,ofstream& out) {
+		int number_of_literals = 0;
+		in.seekg(0);//回到檔案頭
+		while (!in.eof()) {
+			string line,word;
+			getline(in, line);
+			stringstream s(line);
+			s >> word;
+			if (word == ".p") {
+				out << word << ' ';
+				break;
+			}
+			else {
+				out << line << endl;
 			}
 		}
-		//for (int i = 1;i < variable_num;i++) {
-		//	vector<int> index(i);
-		//	int count = 0;
-		//	set<sop*> this_turn;
-		//	for (int j = 0;j < i;j++,count++) {
-		//		index[j] = count;
-		//	}
-		//}
+		out << result.size() << endl;
+		for (auto& i : result) {
+			out << i.bits << " 1\n";
+			for (auto& j : i.bits) {
+				if (j != '-') number_of_literals++;
+			}
+		}
+		out << ".e";
+		cout << "Total number of terms:" << result.size() << endl;
+		cout << "Total number of literals:" << number_of_literals << endl;
 	}
 };
+
+int one_count(bool* b, int size) {
+	int count = 0;
+	for (int i = 0;i < size;i++) {
+		if (b[i])++count;
+	}
+	return count;
+}
+
+void binary_add_one(bool* b,int size) {
+	for (int i = 0;i < size;i++) {
+		b[i] = !b[i];
+		if (b[i]) break;
+	}
+}
 
 int main(int argc, char* argv[]) {
 #ifdef CMD
@@ -178,10 +242,10 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	ifstream input(argv[1]);//argv[0] 是本程式名稱
-	ofstream dotfile(argv[2]);
+	ofstream output(argv[2]);
 #else
 	ifstream input("input.pla");
-	ofstream dotfile("output.pla");
+	ofstream output("output.pla");
 #endif // CMD
 	string line,word;
 	MINI mini;
@@ -232,6 +296,7 @@ int main(int argc, char* argv[]) {
 			mini.Quine_McCluskey();
 		}
 		else if (word == ".e") {
+			mini.output_to_file(input,output);
 			break;
 		}
 		else {
@@ -239,5 +304,7 @@ int main(int argc, char* argv[]) {
 			return 0;
 		}
 	}
+	input.close();
+	output.close();
 	return 0;
 }
