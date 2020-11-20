@@ -140,6 +140,13 @@ public:
 				remain_minterm.push_back(it->first);
 			}
 		}
+		for (auto i = remain_pi.begin();i != remain_pi.end();i++) {
+			for (auto& j : remain_minterm) {
+				if (i->minterms.find(j) == i->minterms.end()) {
+					i->minterms.erase(j);
+				}
+			}
+		}
 		Petrick_Method(remain_minterm, remain_pi);
 		delete[] literal;
 	}
@@ -149,6 +156,9 @@ public:
 		}
 		for (auto i : remain_pi) {
 			cout << i.bits << endl;
+			for (auto j : i.minterms) {
+				cout << '\t' << j->bits << endl;
+			}
 		}
 		//for (int i = 1;i < variable_num;i++) {
 		//	vector<int> index(i);
