@@ -3,8 +3,58 @@ digraph STG {
 
 	INIT [shape=point];
 	a [label="a"];
+	b [label="b"];
+	c [label="c"];
+	d [label="d"];
+	e [label="e"];
+	f [label="f"];
 
 
 	INIT -> a;
-	a -> a [label="00/10,01/11,10/01,11/01"];
+	a -> c [label="00/0,01/1"];
+	a -> b [label="10/1"];
+	a -> e [label="11/0"];
+	b -> b [label="00/1"];
+	b -> f [label="01/1"];
+	b -> d [label="10/1"];
+	b -> e [label="11/1"];
+	c -> d [label="00/0,10/1,11/0"];
+	c -> a [label="01/0"];
+	d -> e [label="00/1"];
+	d -> b [label="01/1"];
+	d -> a [label="10/0"];
+	d -> c [label="11/0"];
+	e -> b [label="00/0,10/1"];
+	e -> a [label="01/1"];
+	e -> c [label="11/1"];
+	f -> b [label="00/0,10/1"];
+	f -> a [label="01/1"];
+	f -> c [label="11/1"];
+}digraph STG {
+	rankdir=LR;
+
+	INIT [shape=point];
+	a [label="a"];
+	b [label="b"];
+	c [label="c"];
+	d [label="d"];
+	e [label="e"];
+
+
+	INIT -> a;
+	a -> c [label="00/0,01/1"];
+	a -> b [label="10/1"];
+	a -> e [label="11/0"];
+	b -> b [label="00/1"];
+	b -> e [label="01/1,11/1"];
+	b -> d [label="10/1"];
+	c -> d [label="00/0,10/1,11/0"];
+	c -> a [label="01/0"];
+	d -> e [label="00/1"];
+	d -> b [label="01/1"];
+	d -> a [label="10/0"];
+	d -> c [label="11/0"];
+	e -> b [label="00/0,10/1"];
+	e -> a [label="01/1"];
+	e -> c [label="11/1"];
 }

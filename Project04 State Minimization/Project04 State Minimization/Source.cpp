@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <utility>
-//#define CMD
+#define CMD
 using namespace std;
 
 struct TERM {
@@ -12,15 +12,28 @@ struct TERM {
 	string current_state;
 	string next_state;
 	string output;
-	bool operator==(const TERM& i) {
+	bool operator==(const TERM& i) const{
 		//return (input == i.input) && (output == i.output) && (next_state == i.next_state);//wrong compare!!!
 		return (input == i.input) && (output == i.output) && ((next_state == i.next_state) || (next_state == i.current_state && i.next_state == current_state));
 	}
-	bool operator!=(const TERM& i) {
+	bool operator!=(const TERM& i) const{
 		return !(*this == i);
 	}
 };
 typedef vector<TERM> STATE;
+bool operator==(const STATE& A, const STATE& B) {
+	for (int i = 0; i < A.size(); i++) {
+		bool flag = false;
+		for (int j = 0; j < B.size(); j++) {
+			if (A[i] == B[j]) {
+				flag = true;
+				break;
+			}
+		}
+		if (!flag) return false;
+	}
+	return true;
+}
 class KISS {
 public:
 	int input_num,output_num,term_num,state_num;
@@ -29,7 +42,7 @@ public:
 	void Minimization() {
 		for (auto i = states.begin();i != states.end();++i) {
 			for (auto j = next(i);j != states.end(); ++j) {
-				if (same_state(i, j)){
+				if (i->second == j->second){
 					if (start_state == j->first) start_state = i->first;
 					for (auto& k : states){
 						for (auto& m : k.second){
@@ -42,20 +55,6 @@ public:
 				}
 			}
 		}
-	}
-	bool same_state(map<string, STATE>::iterator A, map<string, STATE>::iterator B){
-		if (A->first == B->first)return false;
-		for (int i = 0; i < A->second.size(); i++){
-			bool flag = false;
-			for (int j = 0; j < B->second.size(); j++){
-				if (A->second[i] == B->second[j]){
-					flag = true;
-					break;
-				}
-			}
-			if (!flag) return false;
-		}
-		return true;
 	}
 	void output_kiss(ofstream& output) {
 		output << ".start_kiss\n";
@@ -137,6 +136,8 @@ int main(int argc, char* argv[]) {
 					input >> tmp.input >> tmp.current_state >> tmp.next_state >> tmp.output;
 					kiss.states[tmp.current_state].push_back(tmp);
 				}
+				//KISS before_Minimization = kiss;
+				//before_Minimization.output_dot(dot);
 			}
 		}
 	}

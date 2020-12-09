@@ -1,11 +1,27 @@
 .start_kiss
 .i 2
 .o 1
-.p 4
-.s 1
+.p 20
+.s 5
 .r a
-00 a a 10
-01 a a 11
-10 a a 01
-11 a a 01
+00 a c 0
+01 a c 1
+10 a b 1
+11 a e 0
+00 b b 1
+01 b e 1
+10 b d 1
+11 b e 1
+00 c d 0
+01 c a 0
+10 c d 1
+11 c d 0
+00 d e 1
+01 d b 1
+10 d a 0
+11 d c 0
+00 e b 0
+01 e a 1
+10 e b 1
+11 e c 1
 .end_kiss

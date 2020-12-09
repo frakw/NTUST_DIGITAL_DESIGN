@@ -1,39 +1,31 @@
 .start_kiss
 .i 2
 .o 1
-.p 32
-.s 8
-.r h
-00 a b 10
-01 a a 11
-10 a b 01
-11 a c 01
-00 b b 10
-01 b a 11
-10 b b 01
-11 b c 01
-00 c b 10
-01 c a 11
-10 c b 01
-11 c c 01
-00 d b 10
-01 d a 11
-10 d b 01
-11 d c 01
-00 e b 10
-01 e a 11
-10 e b 01
-11 e c 01
-00 f b 10
-01 f a 11
-10 f b 01
-11 f c 01
-00 g b 10
-01 g a 11
-10 g b 01
-11 g c 01
-00 h b 10
-01 h a 11
-10 h b 01
-11 h c 01
+.p 24
+.s 6
+.r a
+00 a c 0
+01 a c 1
+10 a b 1
+11 a e 0
+00 b b 1
+01 b f 1
+10 b d 1
+11 b e 1
+00 c d 0
+01 c a 0
+10 c d 1
+11 c d 0
+00 d e 1
+01 d b 1
+10 d a 0
+11 d c 0
+00 e b 0
+01 e a 1
+10 e b 1
+11 e c 1
+00 f b 0
+01 f a 1
+10 f b 1
+11 f c 1
 .end_kiss
